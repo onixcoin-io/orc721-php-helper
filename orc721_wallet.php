@@ -1,8 +1,4 @@
 <?php
-namespace orcphphelpers;
-
-use orcphphelpers\BitcoinECDSA;
-
 /*
 ;===================================================================================;
 ; Driver params template - Paste on the coin details editor and customize as needed ;
@@ -19,10 +15,8 @@ RPC_PORT               = 5889
 WALLET_PASSPHRASE      = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 MAIN_WALLET_ADDRESS    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 TOKEN_CONTRACT_ADDRESS = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-TOKEN_SYMBOL           = "SYMBOL"
 DEFAULT_GAS_PRICE      = 0.00000001
 DEFAULT_GAS_LIMIT      = 250000
-MIN_BALANCE_FOR_FEES   = 0.01
 */
 
 class orc721_wallet
@@ -34,10 +28,8 @@ class orc721_wallet
     protected $WALLET_PASSPHRASE      = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     protected $MAIN_WALLET_ADDRESS    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     protected $TOKEN_CONTRACT_ADDRESS = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-    protected $TOKEN_SYMBOL           = "SYMBOL";
     protected $DEFAULT_GAS_PRICE      = 0.00000001;
     protected $DEFAULT_GAS_LIMIT      = 250000;
-    protected $MIN_BALANCE_FOR_FEES   = 0.01;
     
     # NOTE: INTERNALS
     
@@ -102,7 +94,7 @@ class orc721_wallet
             return false;
         }
         
-        $hex = ltrim($res["executionResult"]["output"], "0");
+        $hex = substr($res["executionResult"]["output"], -40);
         $res = $this->wallet->fromhexaddress($hex);
         if( $this->wallet->error )
         {
@@ -157,19 +149,6 @@ class orc721_wallet
     {
         $this->error = "";
         
-        $balance = $this->wallet->getaddressbalance($this->MAIN_WALLET_ADDRESS);
-        if( $this->wallet->error )
-        {
-            $this->error = "Balance checking error: " . $this->wallet->error;
-            return false;
-        }
-        
-        if( $this->MIN_BALANCE_FOR_FEES > 0 && $balance < $this->MIN_BALANCE_FOR_FEES )
-        {
-            $this->error = "Address balance is below minimum: $balance. Required: $this->MIN_BALANCE_FOR_FEES";
-            return false;
-        }
-        
         if( ! empty($this->WALLET_PASSPHRASE) )
         {
             $this->wallet->walletpassphrase($this->WALLET_PASSPHRASE, 100);
@@ -215,20 +194,6 @@ class orc721_wallet
     public function setTokenURI($token_id, $uri)
     {
         $this->error = "";
-        
-        $balance = $this->wallet->getaddressbalance($this->MAIN_WALLET_ADDRESS);
-        
-        if( $this->wallet->error )
-        {
-            $this->error = "Balance checking error: " . $this->wallet->error;
-            return false;
-        }
-        
-        if( $this->MIN_BALANCE_FOR_FEES > 0 && $balance < $this->MIN_BALANCE_FOR_FEES )
-        {
-            $this->error = "Address balance is below minimum: $balance. Required: $this->MIN_BALANCE_FOR_FEES";
-            return false;
-        }
         
         if( ! empty($this->WALLET_PASSPHRASE) )
         {
@@ -277,20 +242,6 @@ class orc721_wallet
         $this->error = "";
         
         if( empty($address_from) ) $address_from = $this->MAIN_WALLET_ADDRESS;
-        
-        $balance = $this->wallet->getaddressbalance($address_from);
-        
-        if( $this->wallet->error )
-        {
-            $this->error = "Balance checking error: " . $this->wallet->error;
-            return false;
-        }
-        
-        if($this->MIN_BALANCE_FOR_FEES > 0 && $balance < $this->MIN_BALANCE_FOR_FEES )
-        {
-            $this->error = "Address balance is below minimum: $balance. Required: $this->MIN_BALANCE_FOR_FEES";
-            return false;
-        }
         
         if( ! empty($this->WALLET_PASSPHRASE) )
         {

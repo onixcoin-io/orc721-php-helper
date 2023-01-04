@@ -1,5 +1,4 @@
 <?php
-namespace orcphphelpers;
 
 /**
  * @author Jan Moritz Lindemann
